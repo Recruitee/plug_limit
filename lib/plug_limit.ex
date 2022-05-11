@@ -44,8 +44,8 @@ defmodule PlugLimit do
   Lua script implementations.
   Data stored by Redis rate-limiters in most cases can be considered as strongly interim so
   using highly available Redis Sentinel instances for rate-limiters data might be unnecessary.
-  For high traffic cases, sharding can be easily achieved by distributing consecutive rate-limiters
-  between dedicated Redis instances.
+  For high traffic volume cases, sharding can be easily achieved by distributing independent Phoenix
+  router pipelines or scopes rate-limiters between dedicated Redis instances.
 
   ## Usage
   PlugLimit in most basic use case requires configuration of a function which will execute Redis
@@ -91,7 +91,8 @@ defmodule PlugLimit do
 
   Configuration options details are described in the [Configuration](#module-configuration)
   section below.
-  Built-in rate-limiting algorithms are described in the LIMITERS.md file.
+  Built-in rate-limiting algorithms are described in the "Redis Lua script rate limiters"
+  LIMITERS.md file.
 
   ## Configuration
   PlugLimit configuration is built from following sources:
@@ -151,6 +152,9 @@ defmodule PlugLimit do
     # config/config.exs
     config :plug_limit,
       enabled?: System.get_env("PLUG_LIMIT_ENABLED", "false")
+    # config/dev.exs
+    config :plug_limit,
+      enabled?: true
     ```
     Default: `false`.
   * `:cmd` - MFA tuple pointing at the user defined two arity function executing Redis commands.
@@ -167,6 +171,7 @@ defmodule PlugLimit do
     do not have their own `:cmd` specified.
     Optional if each limiter has its own `:cmd` defined, required otherwise.
   * `:log_level` - specifies log level for rate-limiters that do not set their own `:log_level`.
+    Only library errors are logged - with `put_response/4` function.
     Boolean value `false` disables logging. Please refer to the `Logger` documentation
     for valid log levels. Default: `:error`.
   * `:response` - MFA tuple pointing at the user defined 4 arity function providing request
@@ -179,16 +184,16 @@ defmodule PlugLimit do
     See below for details. Optional.
 
   Custom user rate-limiters are configured as a `:limiters` keyword list.
-  Each rate-limiter declaration is a map with following keys:
+  Rate-limiters are declared as maps with following keys:
   * `:cmd` - overwrites `:cmd` global key for a given rate-limiter. Optional.
   * `:key` - MFA tuple pointing at the user defined two arity function providing Redis keys names
     that will be passed later to the Redis Lua script.
-    Function receives request `t:Plug.Conn.t()` struct as a first argument and static argument from
+    Function receives request `Plug.Conn.t()` struct as a first argument and static argument from
     the MFA tuple as a second argument.
     Function should return `{:ok, [key :: String.t()]}` when successful and `{:error, reason}`
     on error. Function should return especially name of the key that Redis Lua script will use to
     create a unique bucket for a given rate-limiter and requests group.
-    Please refer to LIMITERS.md for further discussion.
+    Please refer to "Redis Lua script rate limiters" LIMITERS.md file for further discussion.
     Example `:key` function implementation:
     ```elixir
     def user_key(%Plug.Conn{assigns: %{user_id: user_id}}, prefix),
@@ -196,7 +201,7 @@ defmodule PlugLimit do
 
     def user_key(_conn, _prefix), do: {:error, "Missing user_id"}
     ```
-    Keys names should follow
+    Redis keys names should follow
     [Redis keys naming conventions](https://redis.io/docs/manual/data-types/data-types-tutorial/#keys).
     `:key` value can be overwritten in a plug call configuration.
     Optional if `:key` is specified for each `PlugLimit` plug call, required otherwise.
@@ -206,7 +211,7 @@ defmodule PlugLimit do
   * `:response` - overwrites global `:response` for a given rate-limiter. Optional.
 
   PlugLimit provides two built-in rate-limiters: `:fixed_window` and `:token_bucket`, please refer
-  to LIMITERS.md for details.
+  to "Redis Lua script rate limiters" LIMITERS.md file for details.
 
   Each rate-limiter is associated with Redis Lua script checking if given request should
   be allowed or blocked and evaluating rate limiting http headers. Redis Lua scripts are configured
@@ -216,9 +221,9 @@ defmodule PlugLimit do
     Function receives as an argument static argument from the MFA tuple.
     Example implementations:
     ```elixir
-    def get_script_1(path), do: File.read(path)
+    def get_lua_script_by_path(path), do: File.read(path)
 
-    def get_script_2(_arg), do: {:ok, "-- Lua script body"}
+    def my_lua_script(_arg), do: {:ok, "-- Lua script body"}
     ```
     Required.
   * `:headers` - list of rate limiting headers keys to be used with headers values returned by
@@ -231,13 +236,14 @@ defmodule PlugLimit do
       "x-ratelimit-remaining"
     ]
     ```
-    Please refer to LIMITERS.md for more detailed discussion on rate limiting headers. Required.
+    Please refer to "Redis Lua script rate limiters" LIMITERS.md file for more detailed discussion
+    on rate limiting headers. Required.
 
   ### Plug call configuration options
   * `:key` - MFA tuple, overwrites value given in limiter's application configuration.
     Required if not provided in the limiter configuration.
-  * `:limiter` - atom selecting rate limiter. List of built-in limiters is provided in LIMITERS.md.
-    Default: `:fixed_window`.
+  * `:limiter` - atom selecting rate limiter. List of built-in limiters is provided in LIMITERS.md
+    file. Default: `:fixed_window`.
   * `:opts` - list with rate limiting options like requests limit, time window length or burst rate.
     List is passed as an argument to the Redis Lua script, see LIMITERS.md for built-in limiters
     options. Required.
@@ -398,25 +404,26 @@ defmodule PlugLimit do
   Puts new rate limiting http response headers in the connection and halts the Plug pipeline if
   rate limit was exceeded.
 
-  `PlugLimit.put_response/4` is a default library function preparing an http response accordingly
+  `put_response/4` is a default `PlugLimit` function preparing an http response accordingly
   with Redis Lua script evaluation results.
   Custom response function can be selected by setting `:response` global or given limiter
   configuration keys.
 
   Function accepts following arguments:
-  1. `t:Plug.Conn.t()` connection.
-  2. Rate-limiter configuration as a `t:PlugLimit.t()` struct.
-  3. Redis Lua script evaluation result as a `t:PlugLimit.eval_result()` type.
+  1. `Plug.Conn.t()` connection.
+  2. Rate-limiter configuration as a `PlugLimit.t()` struct.
+  3. Redis Lua script evaluation result as a `PlugLimit.eval_result()` type.
   4. Static argument given in the `:response` MFA tuple.
 
-  Function returns `t:Plug.Conn.t()` struct with rate limiting headers.
+  Function returns `Plug.Conn.t()` struct with rate limiting headers.
   If rate limit is exceeded function halts Plug pipeline and sends response with `429` status code
   and plain-text body `"Too Many Requests"`.
-  If Redis Lua script evaluation fails, `put_response/4` function will log evaluation error with
-  Logger level set by `:log_level` configuration setting and return unmodified connection struct.
+  If Redis Lua script evaluation or any other rate-limiting processing function fails,
+  `put_response/4` function will log resulting error with Logger level set by `:log_level`
+  configuration setting and return unmodified connection struct.
 
-  Please refer to LIMITERS.md for information on custom response functions and custom Redis Lua
-  scripts.
+  Custom response functions and custom Redis Lua scripts are described in more details in
+  "Redis Lua script rate limiters" LIMITERS.md file.
   """
   @spec put_response(
           conn :: Plug.Conn.t(),
