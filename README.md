@@ -1,4 +1,4 @@
-# PlugLimit
+# PlugLimit (WIP)
 
 Rate limiting Plug module based on Redis Lua scripting.
 
@@ -8,7 +8,7 @@ based on a Plug library. PlugLimit has a modular architecture: users can use the
 scripts implementing custom rate limiting algorithms.
 
 PlugLimit provides two built-in rate limiting algorithms: **fixed window** and **token bucket**.
-Salient Redis Lua scripting feature is resiliency to race conditions which makes it a recommended
+Salient Redis Lua scripting feature is race conditions resiliency which makes it a recommended
 solution for distributed systems.
 
 ## Installation
@@ -43,6 +43,9 @@ def command(command, opts \\ [timeout: 500]) do
   :ok = Redix.stop(pid)
 end
 ```
+
+PlugLimit is tested with both [Redix](https://hex.pm/packages/redix) and
+[eredis](https://hex.pm/packages/eredis) Redis clients.
 
 Phoenix Framework endpoint can be protected with rate-limiter by placing a `PlugLimit` plug call
 in the request processing pipeline:

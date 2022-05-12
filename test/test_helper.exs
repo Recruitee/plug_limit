@@ -23,24 +23,11 @@ defmodule PlugLimit.Test.EredisCli do
 end
 
 defmodule PlugLimit.Test.Helpers do
+  def build_conn(), do: :get |> Plug.Test.conn("/") |> Plug.Conn.assign(:user_id, 123)
+
   def user_id_key(%Plug.Conn{assigns: %{user_id: user_id}}, prefix),
     do: {:ok, ["#{prefix}:#{user_id}"]}
+
+  def put_response_echo(%Plug.Conn{} = conn, conf, eval_result, args),
+    do: {conn, conf, eval_result, args}
 end
-
-# defmodule PlugLimit.Test.Router do
-#   use Plug.Router
-
-#   plug(:match)
-#   plug(:dispatch)
-#   plug(:put_user_id)
-#   plug(PlugLimit, opts: [1, 60], key: {__MODULE__, :user_id_key, "prefix"})
-
-#   get "/" do
-#     conn
-#   end
-
-#   def put_user_id(conn, _opts), do: assign(conn, :user_id, 123)
-
-#   def user_id_key(%Plug.Conn{assigns: %{user_id: user_id}}, prefix),
-#     do: {:ok, ["#{prefix}:#{user_id}"]}
-# end
