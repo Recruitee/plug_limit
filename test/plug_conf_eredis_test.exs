@@ -78,6 +78,14 @@ defmodule PlugLimit.PlugConfEredisTest do
     assert_raise ArgumentError, fn -> PlugLimit.init(opts: [1, 2], key: {M, :f, []}) end
   end
 
+  test "raises KeyError when :limiter doesn't exist" do
+    :ok = Application.put_env(:plug_limit, :enabled?, true)
+
+    assert_raise KeyError, fn ->
+      PlugLimit.init(opts: [1, 2], key: {M, :f, []}, limiter: :not_existing)
+    end
+  end
+
   test "init/2 returns valid defaults when :enabled? is set to `true` Boolean" do
     :ok = Application.put_env(:plug_limit, :enabled?, true)
     :ok = Application.put_env(:plug_limit, :cmd, {__MODULE__, :command, []})
