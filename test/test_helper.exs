@@ -22,6 +22,10 @@ defmodule PlugLimit.Test.EredisCli do
   end
 end
 
+defmodule PlugLimit.Test.ErrorCli do
+  def command(_command, _opts), do: {:error, %{reason: :closed}}
+end
+
 defmodule PlugLimit.Test.Helpers do
   def build_conn(), do: :get |> Plug.Test.conn("/") |> Plug.Conn.assign(:user_id, 123)
 

@@ -1,4 +1,4 @@
-# PlugLimit (WIP)
+# PlugLimit
 
 Rate limiting Plug module based on Redis Lua scripting.
 
@@ -8,7 +8,7 @@ based on a Plug library. PlugLimit has a modular architecture: users can use the
 scripts implementing custom rate limiting algorithms.
 
 PlugLimit provides two built-in rate limiting algorithms: **fixed window** and **token bucket**.
-Salient Redis Lua scripting feature is race conditions resiliency which makes it a recommended
+Salient Redis Lua scripting feature is a race conditions resiliency which makes it a recommended
 solution for distributed systems.
 
 ## Installation
