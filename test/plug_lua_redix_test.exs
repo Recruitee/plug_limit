@@ -62,6 +62,17 @@ defmodule PlugLimit.PlugLuaRedixTest do
     {:ok, script}
   end
 
+  def lua_blocking_script() do
+    script = """
+    local function loop()
+      return loop()
+    end
+    return loop()
+    """
+
+    {:ok, script}
+  end
+
   test "basic input :opts and output http headers flow", %{conn: conn} do
     :ok = Application.put_env(:plug_limit, :limiters, test_limiter: %{luascript: :test_script})
 
@@ -248,5 +259,29 @@ defmodule PlugLimit.PlugLuaRedixTest do
       )
 
     assert PlugLimit.call(conn, opts) == conn
+  end
+
+  @tag capture_log: true
+  test "returns original conn on Redis Lua script timeout", %{conn: conn} do
+    :ok = Application.put_env(:plug_limit, :limiters, test_limiter: %{luascript: :test_script})
+
+    :ok =
+      Application.put_env(:plug_limit, :luascripts,
+        test_script: %{
+          script: {__MODULE__, :lua_blocking_script, []},
+          headers: ["h1", "h2", "h3"]
+        }
+      )
+
+    opts =
+      PlugLimit.init(
+        limiter: :test_limiter,
+        opts: ["o1", "o2", "o3"],
+        key: {PlugLimit.Test.Helpers, :user_id_key, ["prefix"]}
+      )
+
+    assert PlugLimit.call(conn, opts) == conn
+    {:ok, pid} = Redix.start_link()
+    assert Redix.command(pid, ["SCRIPT", "KILL"]) == {:ok, "OK"}
   end
 end
