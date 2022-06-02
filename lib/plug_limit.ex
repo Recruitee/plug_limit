@@ -91,8 +91,12 @@ defmodule PlugLimit do
 
   Configuration options details are described in the [Configuration](#module-configuration)
   section below.
+
   Built-in rate-limiting algorithms are described in the "Redis Lua script rate limiters"
   LIMITERS.md file.
+
+  Unit testing for user applications using PlugLimit library is described in "Unit testing"
+  TESTING.md file.
 
   ## Configuration
   PlugLimit configuration is built from following sources:
