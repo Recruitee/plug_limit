@@ -187,6 +187,11 @@ defmodule PlugLimit do
   * `:luascripts` - keyword list defining Lua scripts for rate-limiters defined with `:limiters`.
     See below for details. Optional.
 
+  PlugLimit `:enabled?` option is the only option evaluated at run-time with `c:Plug.call/2`,
+  so function like `System.get_env/2` can be used here.
+  All other configuration options are initialized with `c:Plug.init/1`, which usually takes place at
+  compile time for production or release environments and run-time for testing and development.
+
   Custom user rate-limiters are configured as a `:limiters` keyword list.
   Rate-limiters are declared as maps with following keys:
   * `:cmd` - overwrites `:cmd` global key for a given rate-limiter. Optional.
@@ -302,7 +307,6 @@ defmodule PlugLimit do
 
   defstruct [
     :cmd,
-    :enabled?,
     :headers,
     :key,
     :log_level,
@@ -314,7 +318,6 @@ defmodule PlugLimit do
 
   @type t() :: %__MODULE__{
           cmd: mfa(),
-          enabled?: boolean(),
           headers: [String.t()],
           key: mfa(),
           log_level: log_level(),
@@ -349,59 +352,57 @@ defmodule PlugLimit do
   @doc false
   @spec init(opts :: Plug.opts()) :: PlugLimit.t()
   def init(opts) do
-    if Application.get_env(:plug_limit, :enabled?, false) in ["true", true] do
-      limiters = Application.get_env(:plug_limit, :limiters, @default_limiters)
-      luascripts = Application.get_env(:plug_limit, :luascripts, @default_luascripts)
+    limiters = Application.get_env(:plug_limit, :limiters, @default_limiters)
+    luascripts = Application.get_env(:plug_limit, :luascripts, @default_luascripts)
 
-      limiter_id = Keyword.get(opts, :limiter, @default_limiter_id)
-      limiter = Keyword.get(limiters, limiter_id) || Keyword.fetch!(@default_limiters, limiter_id)
-      script_id = Map.fetch!(limiter, :luascript)
-      key = Keyword.get(opts, :key) || Map.fetch!(limiter, :key)
+    limiter_id = Keyword.get(opts, :limiter, @default_limiter_id)
+    limiter = Keyword.get(limiters, limiter_id) || Keyword.fetch!(@default_limiters, limiter_id)
+    script_id = Map.fetch!(limiter, :luascript)
+    key = Keyword.get(opts, :key) || Map.fetch!(limiter, :key)
 
-      luascript =
-        Keyword.get(luascripts, script_id) || Keyword.fetch!(@default_luascripts, script_id)
+    luascript =
+      Keyword.get(luascripts, script_id) || Keyword.fetch!(@default_luascripts, script_id)
 
-      script = Map.fetch!(luascript, :script)
-      headers = Map.fetch!(luascript, :headers)
-      l_opts = Keyword.fetch!(opts, :opts)
+    script = Map.fetch!(luascript, :script)
+    headers = Map.fetch!(luascript, :headers)
+    l_opts = Keyword.fetch!(opts, :opts)
 
-      cmd = Map.get(limiter, :cmd) || Application.fetch_env!(:plug_limit, :cmd)
+    cmd = Map.get(limiter, :cmd) || Application.fetch_env!(:plug_limit, :cmd)
 
-      log_level =
-        Map.get(limiter, :log_level) ||
-          Application.get_env(:plug_limit, :log_level, @default_log_level)
+    log_level =
+      Map.get(limiter, :log_level) ||
+        Application.get_env(:plug_limit, :log_level, @default_log_level)
 
-      response =
-        Map.get(limiter, :response) ||
-          Application.get_env(:plug_limit, :response, @default_response)
+    response =
+      Map.get(limiter, :response) ||
+        Application.get_env(:plug_limit, :response, @default_response)
 
-      opts = %{
-        cmd: cmd,
-        enabled?: true,
-        headers: headers,
-        key: key,
-        log_level: log_level,
-        opts: l_opts,
-        response: response,
-        script: script,
-        script_id: script_id
-      }
+    opts = %{
+      cmd: cmd,
+      headers: headers,
+      key: key,
+      log_level: log_level,
+      opts: l_opts,
+      response: response,
+      script: script,
+      script_id: script_id
+    }
 
-      struct!(__MODULE__, opts)
-    else
-      opts = %{enabled?: false}
-      struct!(__MODULE__, opts)
-    end
+    struct!(__MODULE__, opts)
   end
 
   @impl true
   @doc false
   @spec call(conn :: Plug.Conn.t(), conf :: Plug.opts()) :: Plug.Conn.t()
-  def call(conn, %__MODULE__{enabled?: enabled?}) when enabled? in [false, "false"], do: conn
+  def call(conn, conf) do
+    case Application.get_env(:plug_limit, :enabled?, false) do
+      res when res in ["true", true] ->
+        eval_result = eval_limit(conn, conf)
+        apply_response(conn, conf, eval_result)
 
-  def call(conn, %__MODULE__{enabled?: enabled?} = conf) when enabled? in [true, "true"] do
-    eval_result = eval_limit(conn, conf)
-    apply_response(conn, conf, eval_result)
+      res when res in ["false", false] ->
+        conn
+    end
   end
 
   @doc """
