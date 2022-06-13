@@ -16,47 +16,56 @@ defmodule PlugLimit.LuaTokenBucketEredisTest do
 
   test "returns correct rate limiting http headers values", %{sha: sha} do
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["allow", ["5 5;w=2;policy=token_bucket", "2", "2"]]}
+             {:ok, ["allow", ["5 5;w=2;burst=3;policy=token_bucket", "2", "4"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["allow", ["5 5;w=2;policy=token_bucket", "2", "1"]]}
+             {:ok, ["allow", ["5 5;w=2;burst=3;policy=token_bucket", "2", "3"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["allow", ["5 5;w=2;policy=token_bucket", "2", "0", "1"]]}
+             {:ok, ["allow", ["5 5;w=2;burst=3;policy=token_bucket", "2", "2", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["block", ["5 5;w=2;policy=token_bucket", "2", "0", "1"]]}
+             {:ok, ["block", ["5 5;w=2;burst=3;policy=token_bucket", "2", "2", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["block", ["5 5;w=2;policy=token_bucket", "2", "0", "1"]]}
+             {:ok, ["block", ["5 5;w=2;burst=3;policy=token_bucket", "2", "2", "1"]]}
 
     Process.sleep(1000)
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["allow", ["5 5;w=2;policy=token_bucket", "1", "0", "1"]]}
+             {:ok, ["allow", ["5 5;w=2;burst=3;policy=token_bucket", "1", "1", "1"]]}
+
+    assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
+             {:ok, ["block", ["5 5;w=2;burst=3;policy=token_bucket", "1", "1", "1"]]}
+
+    assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
+             {:ok, ["block", ["5 5;w=2;burst=3;policy=token_bucket", "1", "1", "1"]]}
   end
 
   test "rate-limiter resets after time window", %{sha: sha} do
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["allow", ["4 4;w=2;policy=token_bucket", "2", "1"]]}
+             {:ok, ["allow", ["4 4;w=2;burst=2;policy=token_bucket", "2", "3"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["allow", ["4 4;w=2;policy=token_bucket", "2", "0", "1"]]}
+             {:ok, ["allow", ["4 4;w=2;burst=2;policy=token_bucket", "2", "2", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["block", ["4 4;w=2;policy=token_bucket", "2", "0", "1"]]}
+             {:ok, ["block", ["4 4;w=2;burst=2;policy=token_bucket", "2", "2", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["block", ["4 4;w=2;policy=token_bucket", "2", "0", "1"]]}
+             {:ok, ["block", ["4 4;w=2;burst=2;policy=token_bucket", "2", "2", "1"]]}
 
     Process.sleep(1000)
 
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["allow", ["4 4;w=2;policy=token_bucket", "1", "0", "1"]]}
-
-    Process.sleep(1000)
+             {:ok, ["allow", ["4 4;w=2;burst=2;policy=token_bucket", "1", "1", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["allow", ["4 4;w=2;policy=token_bucket", "2", "1"]]}
+             {:ok, ["block", ["4 4;w=2;burst=2;policy=token_bucket", "1", "1", "1"]]}
+
+    Process.sleep(1100)
+
+    assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
+             {:ok, ["allow", ["4 4;w=2;burst=2;policy=token_bucket", "2", "3"]]}
   end
 end

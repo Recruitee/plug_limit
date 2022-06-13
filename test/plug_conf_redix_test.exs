@@ -124,14 +124,13 @@ defmodule PlugLimit.PlugConfRedixTest do
       opts = PlugLimit.init(limiter: :token_bucket, opts: [123_456, 654_321, 123], key: @key)
       conn = PlugLimit.call(conn, opts)
 
-      assert get_resp_header(conn, "x-ratelimit-limit") == [
-               "123456 123456;w=654321;policy=token_bucket"
-             ],
+      assert get_resp_header(conn, "x-ratelimit-limit") ==
+               ["123456 123456;w=654321;burst=123;policy=token_bucket"],
              "valid x-ratelimit-limit"
 
       assert get_resp_header(conn, "x-ratelimit-reset") == ["654321"], "valid x-ratelimit-reset"
 
-      assert get_resp_header(conn, "x-ratelimit-remaining") == ["122"],
+      assert get_resp_header(conn, "x-ratelimit-remaining") == ["123455"],
              "valid x-ratelimit-remaining"
     end
 

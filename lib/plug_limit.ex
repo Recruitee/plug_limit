@@ -30,7 +30,7 @@ defmodule PlugLimit do
   Lua script SHA1 hash is later retrieved from `:persistent_term` local cache and used with
   Redis [`EVALSHA`](https://redis.io/commands/evalsha/) command on subsequent rate-limiter
   Lua script evaluations.
-  Implemented SHA1 script caching mechanism is resilient to Redis script cache resets by Redis
+  Implemented SHA1 Lua script caching mechanism is resilient to Redis script cache resets by Redis
   instance reboots or Redis [`SCRIPT FLUSH`](https://redis.io/commands/script-flush/) command use.
 
   Redis Lua script evaluation is an atomic operation resilient to the race conditions in distributed
@@ -101,7 +101,7 @@ defmodule PlugLimit do
   ## Configuration
   PlugLimit configuration is built from following sources:
   * global `:plug_limit` configuration parameters from application configuration file, usually
-    `config/config.exs`,
+    `config/*.exs`,
   * parameters overwriting global configuration passed as arguments to the PlugLimit plug
     call in the application router or controller,
   * hard-coded default values.
@@ -150,16 +150,6 @@ defmodule PlugLimit do
   * `:enabled?` - when set to Boolean `false` or string `"false"` `PlugLimit` is disabled and
     `plug(PlugLimit, opts: [...])` call immediately returns unmodified `conn` struct.
     To enable `PlugLimit`, `:enabled?` key must be set to Boolean `true` or string `"true"`.
-    In a production environment, `PlugLimit` might be controlled using environmental variable,
-    for example:
-    ```elixir
-    # config/config.exs
-    config :plug_limit,
-      enabled?: System.get_env("PLUG_LIMIT_ENABLED", "false")
-    # config/dev.exs
-    config :plug_limit,
-      enabled?: true
-    ```
     Default: `false`.
   * `:cmd` - MFA tuple pointing at the user defined two arity function executing Redis commands.
     As a first argument function will receive a Redis command as a list, for example:
@@ -191,6 +181,21 @@ defmodule PlugLimit do
   so function like `System.get_env/2` can be used here.
   All other configuration options are initialized with `c:Plug.init/1`, which usually takes place at
   compile time for production or release environments and run-time for testing and development.
+  In a production environment, `PlugLimit` `:enabled` might be controlled using environmental
+  variable, for example:
+  ```elixir
+  # config/config.exs
+  config :plug_limit, cmd: {MyApp.Redis, :command, []}
+
+  # config/releases.exs
+  config :plug_limit, enabled?: System.get_env("PLUG_LIMIT_ENABLED", "false")
+
+  # config/dev.exs
+  config :plug_limit, enabled?: true
+
+  # config/test.exs
+  config :plug_limit, enabled?: true
+  ```
 
   Custom user rate-limiters are configured as a `:limiters` keyword list.
   Rate-limiters are declared as maps with following keys:

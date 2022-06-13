@@ -120,8 +120,8 @@ Pros:
 
 Cons:
 * More complex implementation than fixed window, translating into more Redis CPU resources usage.
-* Limiter state is stored as a Redis hash with two values: requests count and timestamp. It means
-  higher Redis memory requirements than for a fixed window algorithm.
+* Limiter state is stored as a Redis hash with three numeric values: remaining requests count,
+  tokens count and timestamp. It means higher Redis memory requirements than for a fixed window algorithm.
 
 Inputs:
 * function set by `:key` value should return list with a single string. String will be used as a
