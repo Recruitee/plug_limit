@@ -11,7 +11,7 @@ defmodule PlugLimit do
   [Configuration](#module-configuration) section below for details.
 
   `PlugLimit` `call/2` function has following responsibilities:
-  1. Establish if given request should be allowed or blocked in accordance with selected rate
+  1. Establish if given request should be allowed or denied in accordance with selected rate
      limiting strategy.
   2. Determine values of the rate limiting http headers.
   3. Set rate limiting http headers for the response.
@@ -228,7 +228,7 @@ defmodule PlugLimit do
   to "Redis Lua script rate limiters" LIMITERS.md file for details.
 
   Each rate-limiter is associated with Redis Lua script checking if given request should
-  be allowed or blocked and evaluating rate limiting http headers. Redis Lua scripts are configured
+  be allowed or denied and evaluating rate limiting http headers. Redis Lua scripts are configured
   as `:luascripts` keyword list. Each script is declared as a map with following keys:
   * `:script` - MFA tuple pointing at one arity function returning
     `{:ok, limiter_script :: String.t()}` on success and `{:error, reason}` on error.

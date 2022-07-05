@@ -18,21 +18,21 @@ defmodule PlugLimit.LuaFixedWindowRedixTest do
     assert command(["EVALSHA", sha, 1, "test:key", 3, 60]) == {:ok, ["allow", ["3", "60", "2"]]}
     assert command(["EVALSHA", sha, 1, "test:key", 3, 60]) == {:ok, ["allow", ["3", "60", "1"]]}
     assert command(["EVALSHA", sha, 1, "test:key", 3, 60]) == {:ok, ["allow", ["3", "60", "0"]]}
-    assert command(["EVALSHA", sha, 1, "test:key", 3, 60]) == {:ok, ["block", ["3", "60", "0"]]}
-    assert command(["EVALSHA", sha, 1, "test:key", 3, 60]) == {:ok, ["block", ["3", "60", "0"]]}
+    assert command(["EVALSHA", sha, 1, "test:key", 3, 60]) == {:ok, ["deny", ["3", "60", "0"]]}
+    assert command(["EVALSHA", sha, 1, "test:key", 3, 60]) == {:ok, ["deny", ["3", "60", "0"]]}
   end
 
   test "rate-limiter resets after time window", %{sha: sha} do
     assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["allow", ["3", "1", "2"]]}
     assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["allow", ["3", "1", "1"]]}
     assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["allow", ["3", "1", "0"]]}
-    assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["block", ["3", "1", "0"]]}
-    assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["block", ["3", "1", "0"]]}
+    assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["deny", ["3", "1", "0"]]}
+    assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["deny", ["3", "1", "0"]]}
     Process.sleep(1000)
     assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["allow", ["3", "1", "2"]]}
     assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["allow", ["3", "1", "1"]]}
     assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["allow", ["3", "1", "0"]]}
-    assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["block", ["3", "1", "0"]]}
-    assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["block", ["3", "1", "0"]]}
+    assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["deny", ["3", "1", "0"]]}
+    assert command(["EVALSHA", sha, 1, "test:key", 3, 1]) == {:ok, ["deny", ["3", "1", "0"]]}
   end
 end

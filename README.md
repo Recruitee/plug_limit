@@ -79,5 +79,5 @@ Please refer to `PlugLimit` module documentation for detailed library configurat
 guidelines.
 
 ## TODO
-- [ ] Add extended rate-limiter's Redis Lua scripts collecting blocked requests metrics.
+- [ ] Add extended rate-limiter's Redis Lua scripts collecting denied requests metrics.
 - [ ] Add leaky bucket rate limiting algorithm implementation.

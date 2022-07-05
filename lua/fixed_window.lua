@@ -18,7 +18,7 @@ if redis.pcall('EXISTS', id) == 1 then
     return {'allow', h}
   else
     local h = headers(limit, ttl, 0)
-    return {'block', h}
+    return {'deny', h}
   end
 else
   local count = limit - 1

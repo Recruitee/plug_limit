@@ -1,7 +1,7 @@
 # Redis Lua script rate limiters
 
 `PlugLimit` is using Redis Lua scripts to perform following tasks:
-1. Establish if given request should be allowed or blocked.
+1. Establish if given request should be allowed or denied.
 2. Determine rate limiting http headers values.
 
 Redis Lua scripts must internally manage request counters as Redis keys, sets or hashes to provide
@@ -40,7 +40,7 @@ customized response function implementation.
 
 Redis Lua script compatible with `PlugLimit.put_response/4` function should return a list with
 following items:
-1. String `"allow" | "block"` specifying if given request should be allowed or blocked.
+1. String `"allow" | "deny"` specifying if given request should be allowed or denied.
 2. List of http headers values consistent with a list of http headers keys defined with `:headers`
    configuration key.
 3. Other optional output parameters. Optional script output is ignored by built-in
@@ -80,7 +80,7 @@ Fixed window algorithm assumes that timeline is divided into windows of a fixed 
 60 seconds. Time window is associated with requests counter set initially to the requests limit
 value, for example limit 10 requests in 60 seconds time window.
 Request counter is decreased by one on each request. If current request counter value is greater
-than zero request is allowed, otherwise rate limit was exceeded and request is blocked.
+than zero request is allowed, otherwise rate limit was exceeded and request is denied.
 Requests counter is reset to original state after time window seconds number.
 
 Pros:
@@ -98,7 +98,7 @@ Inputs:
 * `:opts` should provide list with two integers: 1. requests limit and 2. time window length in seconds.
 
 Output list:
-* string `"allow" | "block"`,
+* string `"allow" | "deny"`,
 * list of three http headers values in a following order:
   ["x-ratelimit-limit", "x-ratelimit-reset", "x-ratelimit-remaining"]
 
@@ -106,7 +106,7 @@ Output list:
 Algorithm is selected by setting `limiter: :token_bucket` in a plug call.
 Token bucket algorithm is based on an analogy of a fixed capacity bucket filled with tokens.
 Initial amount of tokens in the bucket is equal to the burst value.
-On each request one token is removed from the bucket. If bucket is empty request is blocked.
+On each request one token is removed from the bucket. If bucket is empty request is denied.
 Tokens in the bucket are added with a constant rate calculated in PlugLimit implementation as:
 `(limit - burst) / time_window_length`.
 For example: if time window length is set to 60 seconds, limit is equal 15 requests and
@@ -130,7 +130,7 @@ Inputs:
   1. requests limit, 2. time window length in seconds and 3. allowed initial requests burst count.
 
 Output list:
-* string `"allow" | "block"`,
+* string `"allow" | "deny"`,
 * list of three or four http headers values depending on a bucket tokens count.
   If limiter's bucket is filled with tokens three http headers values are returned:
   ["x-ratelimit-limit", "x-ratelimit-reset", "x-ratelimit-remaining"].

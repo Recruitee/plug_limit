@@ -53,7 +53,7 @@ if redis.pcall('EXISTS', id) == 1 then
     local h = headers(limit, window, ttl, remaining, burst)
     local retry_after = math.min(math.abs(math.ceil(window / (limit - burst) - (now - ts) / 1000)), ttl)
     h[#h+1] = tostring(retry_after)
-    return {'block', h}
+    return {'deny', h}
   end
 else
   local now = time_msec()

@@ -25,10 +25,10 @@ defmodule PlugLimit.LuaTokenBucketRedixTest do
              {:ok, ["allow", ["5 5;w=2;burst=3;policy=token_bucket", "2", "2", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["block", ["5 5;w=2;burst=3;policy=token_bucket", "2", "2", "1"]]}
+             {:ok, ["deny", ["5 5;w=2;burst=3;policy=token_bucket", "2", "2", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["block", ["5 5;w=2;burst=3;policy=token_bucket", "2", "2", "1"]]}
+             {:ok, ["deny", ["5 5;w=2;burst=3;policy=token_bucket", "2", "2", "1"]]}
 
     Process.sleep(1000)
 
@@ -36,10 +36,10 @@ defmodule PlugLimit.LuaTokenBucketRedixTest do
              {:ok, ["allow", ["5 5;w=2;burst=3;policy=token_bucket", "1", "1", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["block", ["5 5;w=2;burst=3;policy=token_bucket", "1", "1", "1"]]}
+             {:ok, ["deny", ["5 5;w=2;burst=3;policy=token_bucket", "1", "1", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 5, 2, 3]) ==
-             {:ok, ["block", ["5 5;w=2;burst=3;policy=token_bucket", "1", "1", "1"]]}
+             {:ok, ["deny", ["5 5;w=2;burst=3;policy=token_bucket", "1", "1", "1"]]}
   end
 
   test "rate-limiter resets after time window", %{sha: sha} do
@@ -50,10 +50,10 @@ defmodule PlugLimit.LuaTokenBucketRedixTest do
              {:ok, ["allow", ["4 4;w=2;burst=2;policy=token_bucket", "2", "2", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["block", ["4 4;w=2;burst=2;policy=token_bucket", "2", "2", "1"]]}
+             {:ok, ["deny", ["4 4;w=2;burst=2;policy=token_bucket", "2", "2", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["block", ["4 4;w=2;burst=2;policy=token_bucket", "2", "2", "1"]]}
+             {:ok, ["deny", ["4 4;w=2;burst=2;policy=token_bucket", "2", "2", "1"]]}
 
     Process.sleep(1000)
 
@@ -61,7 +61,7 @@ defmodule PlugLimit.LuaTokenBucketRedixTest do
              {:ok, ["allow", ["4 4;w=2;burst=2;policy=token_bucket", "1", "1", "1"]]}
 
     assert command(["EVALSHA", sha, 1, "test:key", 4, 2, 2]) ==
-             {:ok, ["block", ["4 4;w=2;burst=2;policy=token_bucket", "1", "1", "1"]]}
+             {:ok, ["deny", ["4 4;w=2;burst=2;policy=token_bucket", "1", "1", "1"]]}
 
     Process.sleep(1100)
 
