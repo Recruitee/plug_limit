@@ -37,7 +37,7 @@ defmodule PlugLimit do
   environments.
 
   In normal circumstances latency introduced by Redis `EVALSHA` command should be close to a single
-  Redis request/response round trip time, usually less than ~0.1 ms.
+  Redis request/response round trip time, usually less than ~1 ms.
 
   Redis Lua script execution blocks single-threaded Redis server, so it is advised to use a separate
   standalone Redis instance for PlugLimit rate-limiters, especially when using custom untested
@@ -91,6 +91,9 @@ defmodule PlugLimit do
 
   Configuration options details are described in the [Configuration](#module-configuration)
   section below.
+
+  Instead of using generic `PlugLimit` module you can use provided convenience wrappers:
+  `PlugLimit.FixedWindow` or `PlugLimit.TokenBucket`.
 
   Built-in rate-limiting algorithms are described in the "Redis Lua script rate limiters"
   LIMITERS.md file.
