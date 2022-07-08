@@ -1,5 +1,5 @@
 defmodule PlugLimit.PlugLuaRedixTest do
-  use ExUnit.Case, async: false
+  use ExUnit.Case
   use Plug.Test
   import ExUnit.CaptureLog
 

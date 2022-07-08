@@ -1,6 +1,5 @@
 defmodule PlugLimit.LuaFixedWindowEredisTest do
-  use ExUnit.Case, async: false
-  use Plug.Test
+  use ExUnit.Case
 
   @script File.read("./lua/fixed_window.lua")
 

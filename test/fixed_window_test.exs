@@ -1,6 +1,5 @@
 defmodule PlugLimit.FixedWindowTest do
-  use ExUnit.Case, async: false
-  use Plug.Test
+  use ExUnit.Case
 
   @cmd {__MODULE__, :command, []}
 

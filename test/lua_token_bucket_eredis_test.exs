@@ -1,6 +1,5 @@
 defmodule PlugLimit.LuaTokenBucketEredisTest do
-  use ExUnit.Case, async: false
-  use Plug.Test
+  use ExUnit.Case
 
   @script File.read("./lua/token_bucket.lua")
 
