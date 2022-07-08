@@ -8,7 +8,7 @@ based on a Plug library. PlugLimit has a modular architecture: users can use the
 scripts implementing custom rate limiting algorithms.
 
 Salient Redis Lua scripting feature is a race conditions resiliency which makes this library
-a recommended solution for distributed systems.
+a recommended solution for distributed systems (e.g.: Phoenix servers behind round robin load balancer).
 
 PlugLimit provides two built-in rate limiters: `PlugLimit.FixedWindow` and `PlugLimit.TokenBucket`.
 
