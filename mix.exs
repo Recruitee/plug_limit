@@ -42,7 +42,7 @@ defmodule PlugLimit.MixProject do
 
   defp docs do
     [
-      extras: ["README.md", "LIMITERS.md", "TESTING.md"],
+      extras: ["README.md", "LIMITERS.md"],
       main: "readme",
       source_url: @source_url,
       source_ref: "v#{@version}",
