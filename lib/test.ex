@@ -150,7 +150,7 @@ defmodule PlugLimit.Test do
   """
   @spec redis_flushdb({m :: module(), f :: atom(), [a :: any()]}) :: :ok | any()
   def redis_flushdb({m, f, a} = _redis_command_function) do
-    case apply(m, f, [["FLUSHDB", "SYNC"]] ++ a) do
+    case apply(m, f, [["FLUSHDB"]] ++ a) do
       {:ok, "OK"} -> :ok
       err -> err
     end
