@@ -33,7 +33,7 @@ defmodule PlugLimit.MixProject do
 
   defp package do
     [
-      files: ~w(lib .formatter.exs mix.exs CHANGELOG.md README.md LIMITERS.md),
+      files: ~w(lib lua .formatter.exs mix.exs CHANGELOG.md README.md LIMITERS.md),
       maintainers: ["Recruitee", "Andrzej Magdziarz"],
       licenses: ["Apache-2.0"],
       links: %{"GitHub" => @source_url}
