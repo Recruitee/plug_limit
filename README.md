@@ -1,5 +1,8 @@
 # PlugLimit
 
+[![Hex Version](https://img.shields.io/hexpm/v/plug_limit)](https://hex.pm/packages/plug_limit)
+[![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen)](https://hexdocs.pm/plug_limit)
+
 Rate limiting Plug module based on Redis Lua scripting.
 
 ## Summary
@@ -17,7 +20,7 @@ Add `PlugLimit` library to your application dependencies:
 ```elixir
 def deps do
   [
-    {:plug_limit, github: "recruitee/plug_limit", branch: "master"}
+    {:plug_limit, "~> 0.1.0"}
   ]
 end
 ```
@@ -82,5 +85,4 @@ Please refer to `PlugLimit` module documentation for detailed library configurat
 guidelines.
 
 ## TODO
-- [ ] Add extended rate-limiter's Redis Lua scripts collecting denied requests metrics.
 - [ ] Add leaky bucket rate limiting algorithm implementation.
