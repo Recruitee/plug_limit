@@ -23,6 +23,10 @@
       "nonFreePackages": true
     },
     "github-cli": "latest",
+    "node": {
+        "version": "lts",
+        "nodeGypDependencies": false
+    },
     "sshd": "latest"
   },
   "forwardPorts": [2222, 6379, 9080],
