@@ -1,0 +1,46 @@
+{
+  "name": "default",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "cacheFrom": "elixir:latest"
+	},
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "jakebecker.elixir-ls",
+        "GitHub.codespaces"
+      ]
+    }
+  },
+  "features": {
+    "common": {
+      "username": "cs",
+      "uid": "1000",
+      "gid": "1000",
+      "installZsh": true,
+      "installOhMyZsh": true,
+      "upgradePackages": true,
+      "nonFreePackages": true
+    },
+    "github-cli": "latest",
+    "sshd": "latest"
+  },
+  "forwardPorts": [2222, 6379, 9080],
+  "portsAttributes": {
+    "2222": {
+      "label": "ssh",
+      "protocol": "tcp"
+    },
+    "6379": {
+      "label": "redis",
+      "protocol": "tcp"
+    },
+    "9080": {
+      "label": "supervisor",
+      "protocol": "http"
+    }
+  },
+  "onCreateCommand": "bash .devcontainer/onCreateCommand.sh",
+  "postStartCommand": "bash .devcontainer/postStartCommand.sh",
+  "remoteUser": "cs"
+}
