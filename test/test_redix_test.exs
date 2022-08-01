@@ -4,7 +4,7 @@ defmodule PlugLimit.TestRedixTest do
   def command(cmd, opts \\ [timeout: 500]), do: PlugLimit.Test.RedixCli.command(cmd, opts)
 
   setup do
-    {:ok, "OK"} = command(["FLUSHALL", "SYNC"])
+    {:ok, "OK"} = command(["FLUSHALL"])
     {:ok, "OK"} = command(["SET", "key:1", "1"])
     {:ok, "OK"} = command(["SET", "key:2", "2"])
     :ok

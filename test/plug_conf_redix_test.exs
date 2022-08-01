@@ -51,8 +51,8 @@ defmodule PlugLimit.PlugConfRedixTest do
       Application.get_all_env(:plug_limit)
       |> Enum.each(fn {k, _v} -> Application.delete_env(:plug_limit, k) end)
 
-      {:ok, "OK"} = command(["FLUSHALL", "SYNC"])
-      {:ok, "OK"} = command(["SCRIPT", "FLUSH", "SYNC"])
+      {:ok, "OK"} = command(["FLUSHALL"])
+      {:ok, "OK"} = command(["SCRIPT", "FLUSH"])
       conn = PlugLimit.Test.Helpers.build_conn()
       %{conn: conn}
     end

@@ -10,8 +10,8 @@ defmodule PlugLimit.PlugLuaRedixTest do
     :ok = Application.put_env(:plug_limit, :enabled?, true)
     :ok = Application.put_env(:plug_limit, :cmd, {__MODULE__, :command, []})
 
-    {:ok, "OK"} = command(["FLUSHALL", "SYNC"])
-    {:ok, "OK"} = command(["SCRIPT", "FLUSH", "SYNC"])
+    {:ok, "OK"} = command(["FLUSHALL"])
+    {:ok, "OK"} = command(["SCRIPT", "FLUSH"])
     conn = PlugLimit.Test.Helpers.build_conn()
     %{conn: conn}
   end

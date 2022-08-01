@@ -24,3 +24,6 @@ plug_limit-*.tar
 
 # Temporary files, for example, from tests.
 /tmp/
+
+# Redis dataset snapshot
+dump.rdb

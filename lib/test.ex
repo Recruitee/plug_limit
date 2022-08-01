@@ -140,7 +140,7 @@ defmodule PlugLimit.Test do
   `{m, f, a}` usually should be consistent with a value given in `:plug_limit` `:cmd` configuration key.
   Returns `:ok` on success or `any()` on error.
 
-  Redis command which is used to delete keys: [`FLUSHDB SYNC`](https://redis.io/commands/flushdb/).
+  Redis command which is used to delete keys: [`FLUSHDB`](https://redis.io/commands/flushdb/).
 
   Example:
   ```elixir

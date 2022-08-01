@@ -4,7 +4,7 @@ defmodule PlugLimit.TestEredisTest do
   def command(cmd, opts \\ 500), do: PlugLimit.Test.EredisCli.command(cmd, opts)
 
   setup do
-    {:ok, "OK"} = command(["FLUSHALL", "SYNC"])
+    {:ok, "OK"} = command(["FLUSHALL"])
     {:ok, "OK"} = command(["SET", "key:1", "1"])
     {:ok, "OK"} = command(["SET", "key:2", "2"])
     :ok

@@ -5,8 +5,8 @@ defmodule PlugLimit.LuaFixedWindowRedixTest do
 
   setup do
     {:ok, script} = @script
-    {:ok, "OK"} = command(["FLUSHALL", "SYNC"])
-    {:ok, "OK"} = command(["SCRIPT", "FLUSH", "SYNC"])
+    {:ok, "OK"} = command(["FLUSHALL"])
+    {:ok, "OK"} = command(["SCRIPT", "FLUSH"])
     {:ok, sha} = command(["SCRIPT", "LOAD", script])
     %{sha: sha}
   end
