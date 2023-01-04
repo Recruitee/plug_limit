@@ -2,6 +2,7 @@
 
 [![Hex Version](https://img.shields.io/hexpm/v/plug_limit)](https://hex.pm/packages/plug_limit)
 [![Hex Docs](https://img.shields.io/badge/hex-docs-lightgreen)](https://hexdocs.pm/plug_limit)
+[![CI](https://github.com/Recruitee/plug_limit/workflows/CI/badge.svg)](https://github.com/Recruitee/plug_limit/actions/workflows/ci.yml)
 
 Rate limiting Plug module based on Redis Lua scripting.
 
